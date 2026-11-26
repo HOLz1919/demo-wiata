@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>konfigurator wiat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Grafit #252B30, jasne tło #F3F4F2, biel #FFFFFF, miedź #C77A43, stal #7C8589 */
+:root{color-scheme:light;--bg:#F3F4F2;--panel:#FFFFFF;--ink:#252B30;--mute:#7C8589;--line:#E4E6E4;--acc:#C77A43;--accInk:#FFFFFF;--shadow:0 10px 28px rgba(37,43,48,.06)}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Schibsted Grotesk",system-ui,sans-serif;overflow-x:clip}
+.page{max-width:760px;margin:0 auto;padding:18px 16px 40px;display:grid;gap:14px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 4px}
+.brand{font-weight:700;letter-spacing:.08em;font-size:13px;text-transform:uppercase}
+.badge{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--ink);color:var(--panel);border-radius:99px;padding:6px 10px}
+.viewer{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:18px;height:min(42vh,380px);min-height:260px;overflow:hidden;box-shadow:var(--shadow)}
+#gl{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block;cursor:grab}
+#gl:active{cursor:grabbing}
+.hint{position:absolute;left:14px;bottom:14px;background:var(--panel);color:var(--mute);padding:6px 12px;border-radius:99px;font-size:12px;pointer-events:none;transition:opacity .6s;box-shadow:0 1px 4px rgba(37,43,48,.12)}
+.hint.off{opacity:0}
+.views{position:absolute;right:14px;bottom:14px;display:flex;gap:6px}
+.views button{font:600 12px/1 inherit;min-height:32px;padding:0 10px;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(37,43,48,.08)}
+.views button[aria-pressed=true]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow)}
+.cardhead{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.cardhead b{font-size:16px}
+.cardhead span{color:var(--mute);font-size:13px}
+.h{margin:0;font-size:15px;font-weight:600}
+.f{display:grid;gap:2px}
+.f .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.f label{font-weight:500}
+.f output{font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.f small{color:var(--mute);font-size:12px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;margin:0;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:99px;background:linear-gradient(90deg,var(--acc) var(--p,40%),#E4E6E4 var(--p,40%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-8px;border:0;border-radius:50%;background:transparent}
+input[type=range]::-moz-range-track{height:3px;border:0;border-radius:99px;background:#E4E6E4}
+input[type=range]::-moz-range-progress{height:3px;border-radius:99px;background:var(--acc)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:transparent}
+.sw{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.sw button{width:28px;height:28px;min-height:28px;padding:0;border-radius:50%;border:1px solid rgba(37,43,48,.15);cursor:pointer}
+.sw button[aria-pressed=true]{outline:2px solid var(--acc);outline-offset:3px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.seg button{min-height:40px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);font:500 14px "Schibsted Grotesk",sans-serif;cursor:pointer}
+.seg button[aria-pressed=true]{border-color:var(--acc);color:var(--acc);background:#FBF6F1}
+.chk{display:flex;gap:10px;align-items:center;font-weight:500;min-height:36px}
+.chk input{width:18px;height:18px;accent-color:var(--acc)}
+.price{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-top:4px}
+.price .k{color:var(--mute);font-size:14px}
+.price .big{font-size:clamp(28px,5vw,36px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.price p{margin:2px 0 0;color:var(--mute);font-size:12px}
+.brk{width:100%;border-collapse:collapse;font-size:13px;color:var(--mute)}
+.brk td{padding:5px 0;border-bottom:1px solid var(--line)}
+.brk td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink)}
+.btn{min-height:52px;border:0;border-radius:12px;background:var(--acc);color:var(--accInk);font:700 14px "Schibsted Grotesk",sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:0 20px;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn svg{width:18px;height:18px;display:block}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.note{font-size:13px;color:var(--mute);margin:0}
+.prev{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:10px;box-shadow:var(--shadow)}
+.prev img{width:100%;border:1px solid var(--line);background:#fff;display:block}
+.empty{min-height:140px;border:1px dashed var(--line);border-radius:12px;display:grid;place-items:center;color:var(--mute);text-align:center;padding:20px;font-size:14px}
+@media(max-width:600px){.panel{padding:16px}.views button{padding:0 8px}}
+@media(prefers-reduced-motion:reduce){.hint{transition:none}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div class="page">
+ <div class="top">
+  <div class="brand">Konfigurator wiaty</div>
+  <div class="badge">Widok 3D</div>
+ </div>
+ <div class="viewer" id="viewer">
+  <canvas id="gl" aria-label="Model 3D wiaty – przeciągnij, aby obrócić"></canvas>
+  <div class="hint" id="hint">Przeciągnij, aby obrócić</div>
+  <div class="views" role="group" aria-label="Widok kamery">
+   <button data-v="p" aria-pressed="true">3D</button><button data-v="f" aria-pressed="false">Przód</button><button data-v="s" aria-pressed="false">Bok</button><button data-v="t" aria-pressed="false">Góra</button>
+  </div>
+ </div>
+
+ <section class="panel">
+  <div class="cardhead"><b>Twoja konfiguracja</b><span>Wizualizacja 3D</span></div>
+  <h2 class="h">Wymiary konstrukcji</h2>
+  <div class="f"><div class="row"><label for="w">Szerokość</label><output id="ow"></output></div><input type="range" id="w" min="2.5" max="7" step="0.1"><small>Kierunek spadku dachu</small></div>
+  <div class="f"><div class="row"><label for="l">Długość</label><output id="ol"></output></div><input type="range" id="l" min="3" max="10" step="0.1"></div>
+  <div class="f"><div class="row"><label for="h">Wysokość</label><output id="oh"></output></div><input type="range" id="h" min="2.2" max="3.2" step="0.05"></div>
+  <div class="f"><div class="row"><label for="a">Kąt dachu</label><output id="oa"></output></div><input type="range" id="a" min="3" max="20" step="1"><small id="hb"></small></div>
+  <div class="f"><div class="row"><label>Kolor poszycia – RAL</label><output id="oral"></output></div><div class="sw" id="sw" role="group" aria-label="Kolor RAL"></div></div>
+  <div class="f"><label>Konstrukcja</label><div class="seg" id="mat" role="group" aria-label="Materiał konstrukcji"><button data-m="stal" aria-pressed="true">Stal malowana</button><button data-m="drewno" aria-pressed="false">Drewno klejone</button></div></div>
+  <label class="chk"><input type="checkbox" id="mont"> Z montażem</label>
+  <div class="price">
+   <div><div class="k">Szacunkowa cena</div><p id="range"></p></div>
+   <div class="big" id="price">—</div>
+  </div>
+  <table class="brk" id="brk"></table>
+  <button class="btn" id="gen">Generuj specyfikację PDF <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg></button>
+  <p class="note" id="genst" role="status"></p>
+ </section>
+
+ <section class="prev"><b>Podgląd specyfikacji</b><div id="sheet" class="empty">Kliknij „Generuj specyfikację”, a tu pojawi się arkusz A4 z rzutami.</div></section>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+{
+const RAL=[['7016','Antracyt','#383E42',1],['9005','Czerń głęboka','#111214',1],['8017','Brąz czekoladowy','#45322E',1],['9006','Aluminium jasne','#A5A8A6',0],['9010','Biel czysta','#F1ECE1',0],['7024','Grafit','#474A51',0],['3009','Czerwień tlenkowa','#642424',0],['6005','Zieleń mchu','#114232',0]];
+const PRICE={stal:430,drewno:540,blacha:95,slup:380,wys:0.12,ralExtra:0.09,montaz:0.15};
+const $=id=>document.getElementById(id);
+const S={w:4,l:5.5,h:2.5,a:8,ral:'7016',mat:'stal',mont:true};
+try{Object.assign(S,JSON.parse(localStorage.getItem('wiata')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('wiata',JSON.stringify(S))}catch(e){}};
+const fmt=n=>Math.round(n/100)*100;
+const zl=n=>fmt(n).toLocaleString('pl-PL')+' zł';
+const m=v=>v.toFixed(2).replace('.',',')+' m';
+const rad=d=>d*Math.PI/180;
+const hBack=()=>S.h+S.w*Math.tan(rad(S.a));
+const nPosts=()=>Math.max(2,Math.ceil(S.l/3)+1);
+
+/* ---------- 3D ---------- */
+const cv=$('gl'),viewer=$('viewer');
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(38,1,0.1,200);
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a8070,1.5));
+const sun=new THREE.DirectionalLight(0xffffff,2.4);sun.position.set(6,10,7);scene.add(sun);
+const fill=new THREE.DirectionalLight(0xffffff,0.6);fill.position.set(-6,4,-5);scene.add(fill);
+const ctl=new OrbitControls(cam,cv);
+ctl.enableDamping=true;ctl.dampingFactor=0.08;ctl.enablePan=false;ctl.maxPolarAngle=rad(88);ctl.minDistance=4;ctl.maxDistance=40;
+
+const shTex=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');const g=x.createRadialGradient(64,64,10,64,64,64);g.addColorStop(0,'rgba(0,0,0,.38)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c)})();
+const shadow=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:shTex,transparent:true,depthWrite:false}));
+shadow.rotation.x=-Math.PI/2;scene.add(shadow);
+const groundLine=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(1,1)),new THREE.LineBasicMaterial({color:0x7C8589}));
+groundLine.rotation.x=-Math.PI/2;groundLine.position.y=0.002;scene.add(groundLine);
+
+const matStal=new THREE.MeshStandardMaterial({color:0x2f3336,metalness:.45,roughness:.5});
+const matDrewno=new THREE.MeshStandardMaterial({color:0xb98a56,metalness:0,roughness:.8});
+const matRoof=new THREE.MeshStandardMaterial({color:0x383e42,metalness:.35,roughness:.5,side:THREE.DoubleSide,flatShading:true});
+const box=new THREE.BoxGeometry(1,1,1);
+const grp=new THREE.Group();scene.add(grp);
+
+function roofGeo(R,D){
+ const s=new THREE.Shape(),p=0.25,t=0.006,hr=0.035,n=Math.ceil(R/p),x0=-n*p/2;
+ const top=[];for(let i=0;i<n;i++){const x=x0+i*p;top.push([x,0],[x+0.13,0],[x+0.155,hr],[x+0.225,hr],[x+0.25,0]);}
+ s.moveTo(top[0][0],top[0][1]);top.forEach(q=>s.lineTo(q[0],q[1]));
+ for(let i=top.length-1;i>=0;i--)s.lineTo(top[i][0],top[i][1]-t);
+ const g=new THREE.ExtrudeGeometry(s,{depth:D,bevelEnabled:false});g.translate(0,0,-D/2);return g;
+}
+let roofMesh=null;
+function build(){
+ for(const c of [...grp.children]){grp.remove(c);if(c.geometry!==box)c.geometry.dispose();}
+ const {w,l,h,a}=S,ar=rad(a),yF=h,yB=hBack(),mat=S.mat==='stal'?matStal:matDrewno,ps=S.mat==='stal'?0.1:0.14;
+ const add=(sx,sy,sz,x,y,z,rz=0)=>{const o=new THREE.Mesh(box,mat);o.scale.set(sx,sy,sz);o.position.set(x,y,z);o.rotation.z=rz;grp.add(o);};
+ const n=nPosts();
+ for(let i=0;i<n;i++){const z=-l/2+ps/2+i*(l-ps)/(n-1);
+  add(ps,yF-0.16,ps,-w/2+ps/2,(yF-0.16)/2,z);
+  const hb=yB-0.16;add(ps,hb,ps,w/2-ps/2,hb/2,z);}
+ add(ps,0.16,l+0.2,-w/2+ps/2,yF-0.08,0);
+ add(ps,0.16,l+0.2,w/2-ps/2,yB-0.08,0);
+ const len=w/Math.cos(ar)+0.3,nr=Math.max(3,Math.round(l/0.7)+1),cy=(yF+yB)/2+0.06/Math.cos(ar);
+ for(let i=0;i<nr;i++)add(len,0.12,0.06,0,cy,-l/2+0.03+i*(l-0.06)/(nr-1),ar);
+ roofMesh=new THREE.Mesh(roofGeo(len+0.1,l+0.5),matRoof);
+ roofMesh.position.set(0,(yF+yB)/2+0.125/Math.cos(ar),0);roofMesh.rotation.z=ar;grp.add(roofMesh);
+ matRoof.color.set(RAL.find(r=>r[0]===S.ral)[2]);
+ shadow.scale.set(w+2.4,l+2.4,1);groundLine.scale.set(w,l,1);
+ ctl.target.set(0,(yF+yB)/3,0);
+ req();
+}
+const VIEWS={p:[1.25,0.75,1.45],f:[0,0.35,1.9],s:[1.9,0.35,0.001],t:[0.001,2.2,0.001]};
+let curView='p';
+function setView(v){curView=v;const d=Math.max(S.w,S.l,hBack())*1.7+3,k=VIEWS[v],len=Math.hypot(...k);
+ cam.position.set(k[0]/len*d,ctl.target.y+k[1]/len*d,k[2]/len*d);ctl.update();req();
+ document.querySelectorAll('.views button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));}
+document.querySelectorAll('.views button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+
+let pending=false;
+function req(){if(!pending){pending=true;requestAnimationFrame(frame);}}
+function frame(){pending=false;ctl.update();renderer.render(scene,cam);}
+ctl.addEventListener('change',req);
+let hinted=false;ctl.addEventListener('start',()=>{if(!hinted){hinted=true;$('hint').classList.add('off');}
+ document.querySelectorAll('.views button').forEach(b=>b.setAttribute('aria-pressed','false'));});
+const ro=new ResizeObserver(()=>{const W=viewer.clientWidth,H=viewer.clientHeight;renderer.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix();req();});
+ro.observe(viewer);
+
+/* ---------- UI ---------- */
+$('sw').innerHTML=RAL.map(r=>`<button data-r="${r[0]}" style="background:${r[2]}" aria-label="RAL ${r[0]} ${r[1]}" aria-pressed="false"></button>`).join('');
+$('sw').onclick=e=>{const b=e.target.closest('button');if(b){S.ral=b.dataset.r;sync();build();}};
+$('mat').onclick=e=>{const b=e.target.closest('button');if(b){S.mat=b.dataset.m;sync();build();}};
+$('mont').onchange=e=>{S.mont=e.target.checked;sync();};
+let raf=0;
+['w','l','h','a'].forEach(k=>$(k).addEventListener('input',e=>{S[k]=+e.target.value;sync();cancelAnimationFrame(raf);raf=requestAnimationFrame(build);}));
+
+function calc(){
+ const {w,l,h,a}=S,area=w*l,roofA=area/Math.cos(rad(a)),r=RAL.find(x=>x[0]===S.ral);
+ const kon=area*PRICE[S.mat]*(1+Math.max(0,(h-2.5)/0.5)*PRICE.wys);
+ const posz=roofA*PRICE.blacha*(r[3]?1:1+PRICE.ralExtra);
+ const sl=nPosts()*2*PRICE.slup;
+ const items=[['Konstrukcja ('+(S.mat==='stal'?'stal':'drewno')+', '+area.toFixed(1).replace('.',',')+' m²)',kon],['Poszycie RAL '+r[0]+(r[3]?'':' (dopłata)'),posz],['Słupy z kotwami ('+nPosts()*2+' szt.)',sl]];
+ if(S.mont)items.push(['Montaż',(kon+posz+sl)*PRICE.montaz]);
+ return {items,total:items.reduce((s,i)=>s+i[1],0),roofA};
+}
+function sync(){
+ ['w','l','h','a'].forEach(k=>{const el=$(k);el.value=S[k];el.style.setProperty('--p',((el.value-el.min)/(el.max-el.min)*100)+'%');});
+ $('ow').textContent=m(S.w);$('ol').textContent=m(S.l);$('oh').textContent=m(S.h);$('oa').textContent=S.a+'°';
+ $('hb').textContent='Wysokość z tyłu: '+m(hBack());
+ const r=RAL.find(x=>x[0]===S.ral);$('oral').textContent='RAL '+r[0]+' '+r[1];
+ document.querySelectorAll('#sw button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===S.ral));
+ document.querySelectorAll('#mat button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===S.mat));
+ $('mont').checked=S.mont;
+ const c=calc();$('price').textContent=zl(c.total);
+ $('range').textContent='netto, widełki '+zl(c.total*0.9)+' – '+zl(c.total*1.1);
+ $('brk').innerHTML=c.items.map(i=>`<tr><td>${i[0]}</td><td>${zl(i[1])}</td></tr>`).join('');
+ save();
+}
+
+/* ---------- PDF: arkusz A4 rysowany na canvas + minimalny zapis PDF ---------- */
+function dim(x,x1,y1,x2,y2,label,off){
+ const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),nx=-dy/L*off,ny=dx/L*off;
+ x.strokeStyle='#C77A43';x.fillStyle='#C77A43';x.lineWidth=1.5;x.beginPath();
+ x.moveTo(x1,y1);x.lineTo(x1+nx*1.15,y1+ny*1.15);x.moveTo(x2,y2);x.lineTo(x2+nx*1.15,y2+ny*1.15);
+ x.moveTo(x1+nx,y1+ny);x.lineTo(x2+nx,y2+ny);x.stroke();
+ [[x1,y1],[x2,y2]].forEach(p=>{x.beginPath();x.arc(p[0]+nx,p[1]+ny,3.5,0,7);x.fill();});
+ x.save();x.translate((x1+x2)/2+nx*1.6,(y1+y2)/2+ny*1.6);let ang=Math.atan2(dy,dx);if(ang>Math.PI/2||ang<-Math.PI/2)ang+=Math.PI;x.rotate(ang);
+ x.font='500 20px "Schibsted Grotesk",sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(label,0,0);x.restore();
+}
+function views(x,X,Y,W,H){
+ const {w,l,h}=S,hb=hBack(),pad=70,ov=0.2;
+ const panel=(i,title,mw,mh,draw)=>{const bx=X+i*(W/3),bw=W/3-20;x.strokeStyle='#d3cec7';x.lineWidth=1;x.strokeRect(bx,Y,bw,H);
+  x.fillStyle='#252B30';x.font='700 22px "Schibsted Grotesk",sans-serif';x.textAlign='left';x.fillText(title,bx+14,Y+32);
+  const s=Math.min((bw-2*pad)/mw,(H-2*pad-30)/mh),ox=bx+bw/2,oy=Y+30+H/2;draw(s,ox,oy);};
+ x.lineJoin='round';
+ panel(0,'Rzut z przodu',w+0.6,hb,(s,ox,oy)=>{const g=oy+hb*s/2,L=ox-w*s/2,R=ox+w*s/2;
+  x.strokeStyle='#252B30';x.lineWidth=2;x.beginPath();x.moveTo(L-40,g);x.lineTo(R+40,g);x.stroke();
+  x.lineWidth=3;x.strokeRect(L,g-h*s,0.1*s,h*s);x.strokeRect(R-0.1*s,g-hb*s,0.1*s,hb*s);
+  const t=Math.tan(rad(S.a));x.beginPath();x.moveTo(L-ov*s,g-(h-ov*t)*s);x.lineTo(R+ov*s,g-(hb+ov*t)*s);x.lineWidth=6;x.stroke();
+  dim(x,L,g,R,g,m(w),-40);dim(x,L,g,L,g-h*s,m(h),-40);dim(x,R,g,R,g-hb*s,m(hb),-40);});
+ panel(1,'Rzut z boku',l+0.6,hb,(s,ox,oy)=>{const g=oy+hb*s/2,L=ox-l*s/2,R=ox+l*s/2,n=nPosts();
+  x.strokeStyle='#252B30';x.lineWidth=2;x.beginPath();x.moveTo(L-40,g);x.lineTo(R+40,g);x.stroke();
+  x.fillStyle='#ece9e4';x.fillRect(L-0.25*s,g-hb*s,(l+0.5)*s,(hb-h)*s+4);x.strokeRect(L-0.25*s,g-hb*s,(l+0.5)*s,(hb-h)*s+4);
+  x.lineWidth=3;for(let i=0;i<n;i++){const px=L+i*(l-0.1)/(n-1)*s;x.strokeRect(px,g-h*s,0.1*s,h*s);}
+  dim(x,L,g,R,g,m(l),40);if(n>2)dim(x,L,g-h*s,L+(l-0.1)/(n-1)*s,g-h*s,'rozstaw '+m((l-0.1)/(n-1)),-28);});
+ panel(2,'Rzut z góry',w+0.6,l+0.6,(s,ox,oy)=>{const T=oy-l*s/2,L=ox-w*s/2,n=nPosts();
+  x.setLineDash([8,6]);x.strokeStyle='#7C8589';x.lineWidth=1.5;x.strokeRect(L-0.15*s,T-0.25*s,(w+0.3)*s,(l+0.5)*s);x.setLineDash([]);
+  x.strokeStyle='#252B30';x.lineWidth=2;x.strokeRect(L,T,w*s,l*s);x.fillStyle='#252B30';
+  for(let i=0;i<n;i++){const py=T+i*(l-0.1)/(n-1)*s;x.fillRect(L,py,0.1*s+2,0.1*s+2);x.fillRect(L+w*s-0.1*s-2,py,0.1*s+2,0.1*s+2);}
+  x.beginPath();x.moveTo(L+w*s*0.7,oy);x.lineTo(L+w*s*0.3,oy);x.lineTo(L+w*s*0.3+12,oy-8);x.moveTo(L+w*s*0.3,oy);x.lineTo(L+w*s*0.3+12,oy+8);x.stroke();
+  x.font='500 18px "Schibsted Grotesk",sans-serif';x.textAlign='center';x.fillText('spadek '+S.a+'°',L+w*s/2,oy-14);
+  dim(x,L,T+l*s,L+w*s,T+l*s,m(w),38);dim(x,L+w*s,T,L+w*s,T+l*s,m(l),-38);});
+}
+async function sheet(){
+ try{await document.fonts.ready}catch(e){}
+ const c=document.createElement('canvas');c.width=1240;c.height=1754;const x=c.getContext('2d'),r=RAL.find(q=>q[0]===S.ral),pr=calc();
+ x.fillStyle='#fff';x.fillRect(0,0,1240,1754);x.fillStyle='#252B30';x.textBaseline='alphabetic';
+ x.font='700 46px "Schibsted Grotesk",sans-serif';
+ x.fillText('Specyfikacja',70,96);
+ x.fillText('wiaty jednospadowej',70,150);
+ x.fillRect(70,174,1100,3);
+ x.fillStyle='#F3F4F2';x.fillRect(70,196,1100,400);
+ renderer.render(scene,cam);const src=renderer.domElement,sc=Math.min(1100/src.width,400/src.height),dw=src.width*sc,dh=src.height*sc;
+ x.drawImage(src,70+(1100-dw)/2,196+(400-dh)/2,dw,dh);
+ const rows=[['Szerokość',m(S.w)],['Długość',m(S.l)],['Wysokość przód / tył',m(S.h)+' / '+m(hBack())],['Kąt dachu',S.a+'°'],['Powierzchnia zabudowy',(S.w*S.l).toFixed(2).replace('.',',')+' m²'],['Powierzchnia dachu',pr.roofA.toFixed(2).replace('.',',')+' m²'],['Konstrukcja',S.mat==='stal'?'stal malowana proszkowo':'drewno klejone BSH'],['Poszycie','blacha trapezowa, RAL '+r[0]+' '+r[1]],['Słupy',nPosts()*2+' szt.'],['Montaż',S.mont?'tak':'nie']];
+ let y=650;
+ rows.forEach(q=>{
+  x.font='400 22px "Schibsted Grotesk",sans-serif';x.fillStyle='#7C8589';x.textAlign='left';x.fillText(q[0],70,y);
+  x.font='700 22px "Schibsted Grotesk",sans-serif';x.fillStyle='#252B30';x.textAlign='right';x.fillText(q[1],1170,y);
+  x.strokeStyle='#e3dfda';x.beginPath();x.moveTo(70,y+14);x.lineTo(1170,y+14);x.stroke();
+  y+=44;
+ });
+ x.textAlign='left';
+ views(x,70,y+28,1120,1754-(y+28)-36);
+ return c;
+}
+function pdf(jpg,W,H){
+ const enc=new TextEncoder(),parts=[],off=[];let len=0;
+ const push=d=>{const u=typeof d==='string'?enc.encode(d):d;parts.push(u);len+=u.length;};
+ const obj=(n,b)=>{off[n]=len;push(n+' 0 obj\n'+b+'\nendobj\n');};
+ push('%PDF-1.4\n');
+ obj(1,'<</Type/Catalog/Pages 2 0 R>>');obj(2,'<</Type/Pages/Kids[3 0 R]/Count 1>>');
+ obj(3,'<</Type/Page/Parent 2 0 R/MediaBox[0 0 595.28 841.89]/Resources<</XObject<</Im0 4 0 R>>>>/Contents 5 0 R>>');
+ off[4]=len;push('4 0 obj\n<</Type/XObject/Subtype/Image/Width '+W+'/Height '+H+'/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length '+jpg.length+'>>\nstream\n');push(jpg);push('\nendstream\nendobj\n');
+ const cs='q 595.28 0 0 841.89 0 0 cm /Im0 Do Q';obj(5,'<</Length '+cs.length+'>>\nstream\n'+cs+'\nendstream');
+ const xo=len;let t='xref\n0 6\n0000000000 65535 f \n';for(let i=1;i<=5;i++)t+=String(off[i]).padStart(10,'0')+' 00000 n \n';
+ push(t+'trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n'+xo+'\n%%EOF');
+ return new Blob(parts,{type:'application/pdf'});
+}
+let lastPdf=null;
+$('gen').onclick=async()=>{
+ const st=$('genst');st.textContent='Generuję arkusz…';
+ const c=await sheet();
+ const img=new Image();img.alt='Podgląd specyfikacji A4';img.src=c.toDataURL('image/jpeg',0.85);
+ const box=$('sheet');box.className='';box.replaceChildren(img);
+ const jpg=new Uint8Array(await (await new Promise(r=>c.toBlob(r,'image/jpeg',0.9))).arrayBuffer());
+ lastPdf=pdf(jpg,c.width,c.height);
+ const kb=Math.round(lastPdf.size/1024);
+ let dl=null;try{dl=await window.claude?.use?.('downloads')}catch(e){}
+ if(!dl){st.textContent='PDF gotowy ('+kb+' kB). Pobieranie jest niedostępne w tym widoku, podgląd arkusza jest poniżej.';return;}
+ try{await dl.save({filename:'specyfikacja-wiaty-'+S.w+'x'+S.l+'.pdf',data:lastPdf});st.textContent='Zapisano PDF ('+kb+' kB).';}
+ catch(e){st.textContent=e&&e.code==='declined'?'Pobieranie anulowane.':'Nie udało się zapisać pliku ('+(e&&e.code||'błąd')+'). Podgląd jest poniżej.';}
+};
+sync();build();setView('p');
+}
+</script>
+</body>
+</html>
